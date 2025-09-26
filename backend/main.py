@@ -52,24 +52,42 @@ app = FastAPI(
 
 # Import config
 from config import get_cors_origins, settings
+from middleware.dynamic_cors import DynamicCORSMiddleware
 
-# Cấu hình CORS - Tự động phát hiện và cấu hình
+# Cấu hình CORS - HOÀN TOÀN DYNAMIC
 cors_origins = get_cors_origins()
-print(f"🌐 CORS Origins configured: {cors_origins}")
 
+# Use Dynamic CORS Middleware for better flexibility
+app.add_middleware(
+    DynamicCORSMiddleware,
+    allow_development=True,
+    allow_localhost=True
+)
+
+# Fallback CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=cors_origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allow_headers=["*"],
 )
 
-# Trusted host middleware (optional, for production)
-if os.getenv("ENVIRONMENT") == "production":
+# Trusted host middleware - ONLY for production
+if settings.ENVIRONMENT == "production":
+    # Only add trusted hosts in production
+    production_hosts = ["localhost", "127.0.0.1"]
+    if settings.cors_origins_list:
+        # Extract hosts from CORS origins
+        import re
+        for origin in settings.cors_origins_list:
+            match = re.match(r'https?://([^/]+)', origin)
+            if match:
+                production_hosts.append(match.group(1))
+    
     app.add_middleware(
         TrustedHostMiddleware,
-        allowed_hosts=["admin.minhha.com", "*.minhha.com", "localhost"]
+        allowed_hosts=production_hosts
     )
 
 # Global exception handler
@@ -137,6 +155,10 @@ app.include_router(products_router, prefix="/api/v1")
 app.include_router(settings_router, prefix="/api/v1")
 app.include_router(dashboard_router, prefix="/api/v1")
 app.include_router(public_router, prefix="/api/v1")  # Public API for frontend
+
+# Include proxy router for CORS bypass
+from routes.proxy import router as proxy_router
+app.include_router(proxy_router)
 
 # Mount static files
 app.mount("/static", StaticFiles(directory="static"), name="static")

@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 CORS Test - Minh Hà</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background: #d4edda; border-color: #c3e6cb; color: #155724; }
+        .error { background: #f8d7da; border-color: #f5c6cb; color: #721c24; }
+        .info { background: #d1ecf1; border-color: #bee5eb; color: #0c5460; }
+        button { padding: 10px 20px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto; }
+        .url-list { list-style: none; padding: 0; }
+        .url-list li { padding: 5px; margin: 2px 0; background: #f8f9fa; border-radius: 3px; }
+        .status { font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 CORS Test - Cửa Hàng Minh Hà</h1>
+        
+        <div class="test-section info">
+            <h3>🌐 Current Environment</h3>
+            <p><strong>Current URL:</strong> <span id="currentUrl"></span></p>
+            <p><strong>Environment Type:</strong> <span id="envType"></span></p>
+            <p><strong>Detected Backend URLs:</strong></p>
+            <ul id="backendUrls" class="url-list"></ul>
+        </div>
+
+        <div class="test-section">
+            <h3>🔍 API Discovery Test</h3>
+            <button onclick="testApiDiscovery()">Test API Discovery</button>
+            <div id="apiDiscoveryResult"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>🏥 Health Check Test</h3>
+            <button onclick="testHealthCheck()">Test Health Check</button>
+            <div id="healthResult"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>📦 Products API Test</h3>
+            <button onclick="testProductsApi()">Test Products API</button>
+            <div id="productsResult"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔒 CORS Headers Test</h3>
+            <button onclick="testCorsHeaders()">Test CORS Headers</button>
+            <div id="corsResult"></div>
+        </div>
+    </div>
+
+    <script>
+        // Environment Detection
+        function detectEnvironment() {
+            const hostname = window.location.hostname;
+            const protocol = window.location.protocol;
+            
+            document.getElementById('currentUrl').textContent = window.location.href;
+            
+            let envType = 'unknown';
+            if (hostname === 'localhost' || hostname === '127.0.0.1') {
+                envType = 'localhost';
+            } else if (hostname.includes('prod-runtime.all-hands.dev')) {
+                envType = 'openhands';
+            } else if (hostname.includes('ngrok.io')) {
+                envType = 'ngrok';
+            } else {
+                envType = 'production';
+            }
+            
+            document.getElementById('envType').textContent = envType;
+            
+            // Generate backend URLs
+            const urls = generateBackendUrls(envType, hostname, protocol);
+            const urlsList = document.getElementById('backendUrls');
+            urlsList.innerHTML = '';
+            urls.forEach(url => {
+                const li = document.createElement('li');
+                li.textContent = url;
+                urlsList.appendChild(li);
+            });
+            
+            return { envType, urls };
+        }
+
+        function generateBackendUrls(envType, hostname, protocol) {
+            const urls = [];
+            
+            switch (envType) {
+                case 'localhost':
+                    urls.push(
+                        `${protocol}//localhost:12000`,
+                        `${protocol}//localhost:8000`,
+                        `${protocol}//127.0.0.1:12000`,
+                        `${protocol}//127.0.0.1:8000`
+                    );
+                    break;
+                    
+                case 'openhands':
+                    const baseUrl = hostname.replace(/^work-\d+-/, '');
+                    urls.push(
+                        `${protocol}//${hostname}:12000`,
+                        `${protocol}//${hostname}:8000`,
+                        `${protocol}//work-1-${baseUrl}:12000`,
+                        `${protocol}//work-2-${baseUrl}:12000`,
+                        `${protocol}//work-1-${baseUrl}`,
+                        `${protocol}//work-2-${baseUrl}`
+                    );
+                    break;
+                    
+                default:
+                    urls.push(
+                        `${protocol}//${hostname}:12000`,
+                        `${protocol}//${hostname}:8000`
+                    );
+            }
+            
+            return urls;
+        }
+
+        // Test Functions
+        async function testApiDiscovery() {
+            const result = document.getElementById('apiDiscoveryResult');
+            result.innerHTML = '<p>🔍 Testing API discovery...</p>';
+            
+            const { urls } = detectEnvironment();
+            const results = [];
+            
+            for (const url of urls) {
+                try {
+                    const response = await fetch(`${url}/health`, {
+                        method: 'GET',
+                        mode: 'cors',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        results.push({
+                            url,
+                            status: 'success',
+                            data
+                        });
+                        break; // Found working URL
+                    } else {
+                        results.push({
+                            url,
+                            status: 'error',
+                            error: `HTTP ${response.status}`
+                        });
+                    }
+                } catch (error) {
+                    results.push({
+                        url,
+                        status: 'error',
+                        error: error.message
+                    });
+                }
+            }
+            
+            let html = '<h4>API Discovery Results:</h4>';
+            results.forEach(result => {
+                const className = result.status === 'success' ? 'success' : 'error';
+                html += `<div class="${className}">
+                    <strong>${result.url}</strong>: 
+                    <span class="status">${result.status}</span>
+                    ${result.data ? `<pre>${JSON.stringify(result.data, null, 2)}</pre>` : ''}
+                    ${result.error ? `<p>Error: ${result.error}</p>` : ''}
+                </div>`;
+            });
+            
+            result.innerHTML = html;
+        }
+
+        async function testHealthCheck() {
+            const result = document.getElementById('healthResult');
+            result.innerHTML = '<p>🏥 Testing health check...</p>';
+            
+            const { urls } = detectEnvironment();
+            
+            try {
+                const response = await fetch(`${urls[0]}/health`, {
+                    method: 'GET',
+                    mode: 'cors'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    result.innerHTML = `<div class="success">
+                        <h4>✅ Health Check Success</h4>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>`;
+                } else {
+                    result.innerHTML = `<div class="error">
+                        <h4>❌ Health Check Failed</h4>
+                        <p>Status: ${response.status}</p>
+                    </div>`;
+                }
+            } catch (error) {
+                result.innerHTML = `<div class="error">
+                    <h4>❌ Health Check Error</h4>
+                    <p>${error.message}</p>
+                </div>`;
+            }
+        }
+
+        async function testProductsApi() {
+            const result = document.getElementById('productsResult');
+            result.innerHTML = '<p>📦 Testing products API...</p>';
+            
+            const { urls } = detectEnvironment();
+            
+            try {
+                const response = await fetch(`${urls[0]}/api/products`, {
+                    method: 'GET',
+                    mode: 'cors'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    result.innerHTML = `<div class="success">
+                        <h4>✅ Products API Success</h4>
+                        <p>Found ${data.length} products</p>
+                        <pre>${JSON.stringify(data.slice(0, 2), null, 2)}</pre>
+                    </div>`;
+                } else {
+                    result.innerHTML = `<div class="error">
+                        <h4>❌ Products API Failed</h4>
+                        <p>Status: ${response.status}</p>
+                    </div>`;
+                }
+            } catch (error) {
+                result.innerHTML = `<div class="error">
+                    <h4>❌ Products API Error</h4>
+                    <p>${error.message}</p>
+                </div>`;
+            }
+        }
+
+        async function testCorsHeaders() {
+            const result = document.getElementById('corsResult');
+            result.innerHTML = '<p>🔒 Testing CORS headers...</p>';
+            
+            const { urls } = detectEnvironment();
+            
+            try {
+                const response = await fetch(`${urls[0]}/health`, {
+                    method: 'OPTIONS',
+                    mode: 'cors',
+                    headers: {
+                        'Origin': window.location.origin,
+                        'Access-Control-Request-Method': 'GET',
+                        'Access-Control-Request-Headers': 'Content-Type'
+                    }
+                });
+                
+                const corsHeaders = {};
+                response.headers.forEach((value, key) => {
+                    if (key.toLowerCase().includes('access-control')) {
+                        corsHeaders[key] = value;
+                    }
+                });
+                
+                result.innerHTML = `<div class="success">
+                    <h4>✅ CORS Headers</h4>
+                    <pre>${JSON.stringify(corsHeaders, null, 2)}</pre>
+                </div>`;
+            } catch (error) {
+                result.innerHTML = `<div class="error">
+                    <h4>❌ CORS Headers Error</h4>
+                    <p>${error.message}</p>
+                </div>`;
+            }
+        }
+
+        // Initialize on page load
+        window.onload = function() {
+            detectEnvironment();
+        };
+    </script>
+</body>
+</html>

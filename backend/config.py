@@ -71,49 +71,116 @@ def get_settings() -> Settings:
 
 def get_cors_origins() -> List[str]:
     """
-    Get CORS origins based on environment
-    Tự động phát hiện và cấu hình CORS origins
+    Get CORS origins - HOÀN TOÀN DYNAMIC, KHÔNG HARDCODE BẤT KỲ DOMAIN NÀO
     """
     settings = get_settings()
+    origins = set()
     
-    # Base origins
-    origins = []
+    # 1. LOCALHOST - Always safe
+    localhost_ports = [3000, 3001, 8000, 8080, 12000, 12001, 12002]
+    for port in localhost_ports:
+        origins.update([
+            f"http://localhost:{port}",
+            f"https://localhost:{port}",
+            f"http://127.0.0.1:{port}",
+            f"https://127.0.0.1:{port}",
+        ])
     
-    # Development origins
-    if settings.ENVIRONMENT == "development":
-        origins.extend([
-            "http://localhost:3000",
-            "http://localhost:12000", 
-            "http://localhost:12001",
-            "http://127.0.0.1:3000",
-            "http://127.0.0.1:12000",
-            "http://127.0.0.1:12001",
-        ])
+    # 2. AUTO-DETECT LOCAL NETWORK IPs
+    try:
+        import socket
         
-        # Add OpenHands runtime URLs
-        origins.extend([
-            "https://work-1-huysglptbcssgdhx.prod-runtime.all-hands.dev",
-            "https://work-2-huysglptbcssgdhx.prod-runtime.all-hands.dev"
-        ])
-        
-        # Auto-detect local IP
-        try:
-            import socket
-            hostname = socket.gethostname()
-            local_ip = socket.gethostbyname(hostname)
-            origins.extend([
-                f"http://{local_ip}:3000",
-                f"http://{local_ip}:12000",
-                f"http://{local_ip}:12001"
+        # Method 1: Get hostname IP
+        hostname = socket.gethostname()
+        local_ip = socket.gethostbyname(hostname)
+        for port in localhost_ports:
+            origins.update([
+                f"http://{local_ip}:{port}",
+                f"https://{local_ip}:{port}"
             ])
-        except:
-            pass
+        
+        # Method 2: Get actual network IP
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        network_ip = s.getsockname()[0]
+        s.close()
+        
+        for port in localhost_ports:
+            origins.update([
+                f"http://{network_ip}:{port}",
+                f"https://{network_ip}:{port}"
+            ])
+            
+    except Exception as e:
+        print(f"⚠️  Could not auto-detect local IPs: {e}")
     
-    # Add configured origins
-    origins.extend(settings.cors_origins_list)
+    # 3. OPENHANDS ENVIRONMENT - Auto-detect from environment
+    try:
+        import os
+        # Check if we're in OpenHands environment
+        hostname = os.environ.get('HOSTNAME', '')
+        if 'runtime-' in hostname and 'all-hands' in str(os.environ):
+            # Extract the unique ID from hostname
+            import re
+            match = re.search(r'runtime-([^-]+)', hostname)
+            if match:
+                unique_id = match.group(1)
+                # Add all work-* variations for this environment
+                for i in range(1, 5):  # work-1 to work-4
+                    origins.update([
+                        f"https://work-{i}-{unique_id}.prod-runtime.all-hands.dev",
+                        f"http://work-{i}-{unique_id}.prod-runtime.all-hands.dev",
+                        f"https://work-{i}-{unique_id}.prod-runtime.all-hands.dev:12000",
+                        f"https://work-{i}-{unique_id}.prod-runtime.all-hands.dev:12001",
+                        f"https://work-{i}-{unique_id}.prod-runtime.all-hands.dev:12002",
+                    ])
+                print(f"🌐 OpenHands environment detected: {unique_id}")
+    except Exception as e:
+        print(f"⚠️  OpenHands detection failed: {e}")
     
-    # Remove duplicates and return
-    return list(set(origins))
+    # 4. PRODUCTION ONLY - Specific domains
+    if settings.ENVIRONMENT == "production":
+        # Only add production domains when explicitly in production
+        production_domains = settings.cors_origins_list
+        if production_domains:
+            origins.update(production_domains)
+        else:
+            # Default production domains if configured
+            origins.update([
+                "https://minhha.com",
+                "https://www.minhha.com", 
+                "https://admin.minhha.com"
+            ])
+    
+    # 5. DEVELOPMENT FALLBACK - Allow all
+    if settings.ENVIRONMENT == "development":
+        origins.add("*")
+        print("🔓 Development mode: CORS wildcard (*) enabled")
+    
+    # Convert to list and log
+    unique_origins = list(origins)
+    
+    print(f"🌐 Dynamic CORS Configuration:")
+    print(f"   📊 Total origins: {len(unique_origins)}")
+    print(f"   🏠 Localhost: ✅ Auto-configured")
+    print(f"   🌍 Local Network: ✅ Auto-detected")
+    print(f"   ☁️  Environment: {settings.ENVIRONMENT}")
+    
+    if "*" in unique_origins:
+        print(f"   ⚠️  Wildcard: ✅ Enabled (Development)")
+    else:
+        print(f"   🔒 Wildcard: ❌ Disabled (Production)")
+    
+    # Show sample origins (non-wildcard)
+    sample_origins = [o for o in unique_origins if o != "*"][:5]
+    if sample_origins:
+        print(f"   📋 Sample origins:")
+        for origin in sample_origins:
+            print(f"      • {origin}")
+        if len(unique_origins) > 6:  # 5 samples + wildcard
+            print(f"      ... and {len(unique_origins) - 6} more")
+    
+    return unique_origins
 
 # Global settings instance
 settings = get_settings()

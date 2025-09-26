@@ -95,7 +95,7 @@ export interface Category {
 export const apiService = {
   // Lấy tất cả sản phẩm
   async getProducts(): Promise<Product[]> {
-    const response = await api.get('/api/v1/public/products/');
+    const response = await api.get('/api/products');
     const products = response.data.products || response.data.data || response.data;
     
     // Backend trả về dữ liệu với format khác, map lại cho frontend
@@ -113,7 +113,7 @@ export const apiService = {
 
   // Lấy sản phẩm theo ID
   async getProduct(id: number): Promise<Product> {
-    const response = await api.get(`/api/v1/public/products/${id}/`);
+    const response = await api.get(`/api/products/${id}`);
     const product = response.data.data || response.data;
     
     // Add legacy compatibility fields
@@ -129,7 +129,7 @@ export const apiService = {
 
   // Lấy chi tiết sản phẩm theo ID
   async getProductById(id: number): Promise<ProductDetail> {
-    const response = await api.get(`/api/v1/public/products/${id}/`);
+    const response = await api.get(`/api/products/${id}`);
     const product = response.data.data || response.data;
     
     return {

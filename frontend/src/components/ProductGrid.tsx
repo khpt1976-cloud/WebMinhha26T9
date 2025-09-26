@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import ProductCard from './ProductCard';
 import { apiService, Category } from '../services/api';
+import proxyApi from '../services/proxy-api';
 
 const GridContainer = styled.div`
   max-width: 1200px;
@@ -149,6 +150,50 @@ const ProductGrid: React.FC = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
+        console.log('🔄 Trying Proxy API first...');
+        
+        // Try proxy API first
+        try {
+          const products = await proxyApi.getProducts();
+          console.log('✅ Proxy API products:', products.length);
+          
+          if (products && products.length > 0) {
+            // Group products by category
+            const categoryMap = new Map();
+            
+            products.forEach(product => {
+              const categoryName = product.category || 'Uncategorized';
+              if (!categoryMap.has(categoryName)) {
+                categoryMap.set(categoryName, {
+                  id: categoryName.toLowerCase().replace(/\s+/g, '-'),
+                  name: categoryName,
+                  slug: categoryName.toLowerCase().replace(/\s+/g, '-'),
+                  products: []
+                });
+              }
+              categoryMap.get(categoryName).products.push(product);
+            });
+            
+            const categoriesWithProducts = Array.from(categoryMap.values()).map(category => ({
+              ...category,
+              products: category.products.slice(0, 8) // Limit to 8 products per category
+            }));
+            
+            setCategories(categoriesWithProducts);
+            
+            // Initialize slide positions
+            const initialSlides: {[key: number]: number} = {};
+            categoriesWithProducts.forEach(category => {
+              initialSlides[category.id] = 0;
+            });
+            setCurrentSlides(initialSlides);
+            return; // Success with proxy API
+          }
+        } catch (proxyError) {
+          console.warn('⚠️ Proxy API failed, trying original API:', proxyError);
+        }
+        
+        // Fallback to original API
         const data = await apiService.getCategories();
         
         // Fetch products for each category

@@ -3,6 +3,8 @@
  * Tự động phát hiện và cấu hình API URL cho mọi môi trường
  */
 
+import { findWorkingApiUrl, getEnvironmentConfig } from './environment-detector';
+
 interface ApiConfig {
   baseURL: string;
   imageBaseURL: string;
@@ -11,7 +13,7 @@ interface ApiConfig {
 }
 
 /**
- * Tự động phát hiện API URL dựa trên môi trường hiện tại
+ * Tự động phát hiện API URL dựa trên môi trường hiện tại (Legacy - for backward compatibility)
  */
 function detectApiUrl(): string {
   // 1. Kiểm tra environment variable trước
@@ -22,19 +24,16 @@ function detectApiUrl(): string {
   // 2. Phát hiện dựa trên hostname hiện tại
   const hostname = window.location.hostname;
   const protocol = window.location.protocol;
-  const port = window.location.port;
 
   // Development environments
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
-    // Thử các port backend phổ biến
-    const backendPorts = ['8000', '5000', '3001', '8080'];
-    return `${protocol}//${hostname}:8000`; // Default backend port
+    return `${protocol}//${hostname}:8000`; // FastAPI default port
   }
 
   // OpenHands runtime environment
   if (hostname.includes('prod-runtime.all-hands.dev')) {
-    // Sử dụng work-2 cho backend (port 12001)
-    return `${protocol}//${hostname.replace('work-1-', 'work-2-')}`;
+    // Sử dụng work-1 cho backend (port 12000)
+    return `${protocol}//${hostname.replace('work-2-', 'work-1-').replace('work-3-', 'work-1-')}`;
   }
 
   // Production environment
@@ -72,6 +71,7 @@ async function findAvailableApiUrl(): Promise<string> {
   // Danh sách các URL có thể
   const possibleUrls = [
     process.env.REACT_APP_API_URL,
+    `${protocol}//${hostname}:12000`,
     `${protocol}//${hostname}:8000`,
     `${protocol}//${hostname}:5000`,
     `${protocol}//${hostname}:3001`,
@@ -102,10 +102,10 @@ async function findAvailableApiUrl(): Promise<string> {
 }
 
 /**
- * Tạo cấu hình API
+ * Tạo cấu hình API với auto-detection
  */
 export async function createApiConfig(): Promise<ApiConfig> {
-  const baseURL = await findAvailableApiUrl();
+  const baseURL = await findWorkingApiUrl();
   
   return {
     baseURL,
