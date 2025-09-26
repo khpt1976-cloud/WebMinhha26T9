@@ -161,7 +161,7 @@ const ProductGrid: React.FC = () => {
             // Group products by category
             const categoryMap = new Map();
             
-            products.forEach(product => {
+            products.forEach((product: any) => {
               const categoryName = product.category || 'Uncategorized';
               if (!categoryMap.has(categoryName)) {
                 categoryMap.set(categoryName, {

@@ -86,7 +86,7 @@ export function getPossibleApiUrls(): string[] {
       break;
   }
   
-  return [...new Set(urls)]; // Remove duplicates
+  return Array.from(new Set(urls)); // Remove duplicates
 }
 
 /**

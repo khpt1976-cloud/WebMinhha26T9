@@ -3,7 +3,7 @@
  * Uses same-origin proxy endpoints to avoid CORS problems
  */
 
-import { findWorkingApiUrl } from '../utils/environment-detector';
+import { findWorkingApiUrl } from '../config/environment-detector';
 
 class ProxyApiService {
     constructor() {
