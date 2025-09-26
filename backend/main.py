@@ -50,17 +50,16 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Cấu hình CORS
+# Import config
+from config import get_cors_origins, settings
+
+# Cấu hình CORS - Tự động phát hiện và cấu hình
+cors_origins = get_cors_origins()
+print(f"🌐 CORS Origins configured: {cors_origins}")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000", 
-        "http://localhost:3001",
-        "http://localhost:12000", 
-        "http://localhost:12001",
-        "https://work-1-gmtegmtpagngotki.prod-runtime.all-hands.dev",
-        "https://work-2-gmtegmtpagngotki.prod-runtime.all-hands.dev"
-    ],
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

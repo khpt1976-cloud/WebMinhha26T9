@@ -1,6 +1,16 @@
 import axios from 'axios';
+import { defaultApiConfig, createApiConfig } from '../config/api-config';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+// Sử dụng cấu hình tự động phát hiện
+const API_BASE_URL = defaultApiConfig.baseURL;
+
+// Tự động cập nhật API URL khi app khởi động
+createApiConfig().then(config => {
+  api.defaults.baseURL = config.baseURL;
+  console.log('🔄 API URL updated to:', config.baseURL);
+}).catch(error => {
+  console.warn('⚠️ Failed to auto-detect API URL:', error);
+});
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -85,17 +95,19 @@ export interface Category {
 export const apiService = {
   // Lấy tất cả sản phẩm
   async getProducts(): Promise<Product[]> {
-    const response = await api.get('/api/v1/public/products/');
+    const response = await api.get('/api/products');
     const products = response.data.products || response.data.data || response.data;
     
-    // Add legacy compatibility fields
-    return products.map((product: Product) => ({
+    // Backend trả về dữ liệu với format khác, map lại cho frontend
+    return products.map((product: any) => ({
       ...product,
-      title: product.name || '',
-      image: product.main_image_url || '',
-      price: product.current_price?.toString() || product.sale_price?.toString() || product.original_price?.toString() || '0',
-      rating: product.rating_average || 0,
-      category: product.category_name || ''
+      name: product.title || product.name || '',
+      title: product.title || product.name || '',
+      image: product.image || product.main_image_url || '',
+      price: product.price || product.current_price?.toString() || product.sale_price?.toString() || product.original_price?.toString() || '0',
+      original_price: product.original_price || 0,
+      rating: product.rating || product.rating_average || 0,
+      category: product.category || product.category_name || ''
     }));
   },
 
@@ -142,31 +154,33 @@ export const apiService = {
 
   // Lấy tất cả danh mục
   async getCategories(): Promise<Category[]> {
-    const response = await api.get('/api/v1/public/categories/');
+    const response = await api.get('/api/categories');
     const categories = response.data.categories || response.data.data || response.data;
     return categories;
   },
 
   // Lấy danh mục theo slug
   async getCategory(slug: string): Promise<Category> {
-    const response = await api.get(`/api/v1/public/categories/${slug}/`);
+    const response = await api.get(`/api/categories/${slug}`);
     const category = response.data.data || response.data;
     return category;
   },
 
   // Tìm kiếm sản phẩm
   async searchProducts(query: string): Promise<{query: string, results: Product[], total: number}> {
-    const response = await api.get(`/api/v1/public/products/?search=${encodeURIComponent(query)}`);
+    const response = await api.get(`/api/search?q=${encodeURIComponent(query)}`);
     const products = response.data.products || response.data.data || response.data;
     
-    // Add legacy compatibility fields
-    const results = products.map((product: Product) => ({
+    // Backend trả về dữ liệu với format khác, map lại cho frontend
+    const results = products.map((product: any) => ({
       ...product,
-      title: product.name || '',
-      image: product.main_image_url || '',
-      price: product.current_price?.toString() || product.sale_price?.toString() || product.original_price?.toString() || '0',
-      rating: product.rating_average || 0,
-      category: product.category_name || ''
+      name: product.title || product.name || '',
+      title: product.title || product.name || '',
+      image: product.image || product.main_image_url || '',
+      price: product.price || product.current_price?.toString() || product.sale_price?.toString() || product.original_price?.toString() || '0',
+      original_price: product.original_price || 0,
+      rating: product.rating || product.rating_average || 0,
+      category: product.category || product.category_name || ''
     }));
     
     return {
