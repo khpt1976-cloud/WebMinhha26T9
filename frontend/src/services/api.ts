@@ -95,7 +95,7 @@ export interface Category {
 export const apiService = {
   // Lấy tất cả sản phẩm
   async getProducts(): Promise<Product[]> {
-    const response = await api.get('/api/products');
+    const response = await api.get('/api/v1/public/products/');
     const products = response.data.products || response.data.data || response.data;
     
     // Backend trả về dữ liệu với format khác, map lại cho frontend
@@ -154,21 +154,21 @@ export const apiService = {
 
   // Lấy tất cả danh mục
   async getCategories(): Promise<Category[]> {
-    const response = await api.get('/api/categories');
+    const response = await api.get('/api/v1/public/categories/');
     const categories = response.data.categories || response.data.data || response.data;
     return categories;
   },
 
   // Lấy danh mục theo slug
   async getCategory(slug: string): Promise<Category> {
-    const response = await api.get(`/api/categories/${slug}`);
+    const response = await api.get(`/api/v1/public/categories/${slug}/`);
     const category = response.data.data || response.data;
     return category;
   },
 
   // Tìm kiếm sản phẩm
   async searchProducts(query: string): Promise<{query: string, results: Product[], total: number}> {
-    const response = await api.get(`/api/search?q=${encodeURIComponent(query)}`);
+    const response = await api.get(`/api/v1/public/products/search/?q=${encodeURIComponent(query)}`);
     const products = response.data.products || response.data.data || response.data;
     
     // Backend trả về dữ liệu với format khác, map lại cho frontend
