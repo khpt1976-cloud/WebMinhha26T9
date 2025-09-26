@@ -1,0 +1,24 @@
+{
+  "name": "everon-website",
+  "version": "1.0.0",
+  "description": "Website bán chăn ga gối đệm Everon clone",
+  "scripts": {
+    "start": "./start.sh",
+    "stop": "./stop.sh",
+    "dev:frontend": "cd frontend && npm start",
+    "dev:backend": "cd backend && source venv/bin/activate && python main.py",
+    "build:frontend": "cd frontend && npm run build",
+    "install:frontend": "cd frontend && npm install",
+    "install:backend": "cd backend && pip install -r requirements.txt"
+  },
+  "keywords": [
+    "everon",
+    "ecommerce",
+    "react",
+    "fastapi",
+    "typescript",
+    "python"
+  ],
+  "author": "OpenHands AI",
+  "license": "MIT"
+}

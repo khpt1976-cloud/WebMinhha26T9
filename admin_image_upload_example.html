@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý ảnh sản phẩm - Admin</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #333;
+            font-size: 28px;
+        }
+        
+        .product-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        
+        .upload-section {
+            margin-bottom: 40px;
+        }
+        
+        .upload-area {
+            border: 2px dashed #007bff;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            background: #f8f9ff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .upload-area:hover {
+            border-color: #0056b3;
+            background: #e6f3ff;
+        }
+        
+        .upload-area.dragover {
+            border-color: #28a745;
+            background: #e6ffe6;
+        }
+        
+        .upload-icon {
+            font-size: 48px;
+            color: #007bff;
+            margin-bottom: 15px;
+        }
+        
+        .upload-text {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .upload-hint {
+            font-size: 14px;
+            color: #999;
+        }
+        
+        .image-type-selector {
+            margin: 20px 0;
+        }
+        
+        .image-type-selector label {
+            display: inline-block;
+            margin-right: 20px;
+            font-weight: 500;
+        }
+        
+        .image-type-selector input[type="radio"] {
+            margin-right: 8px;
+        }
+        
+        .current-images {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .image-item {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            background: white;
+        }
+        
+        .image-item img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+        
+        .image-info {
+            padding: 15px;
+        }
+        
+        .image-type {
+            font-weight: bold;
+            color: #007bff;
+            font-size: 12px;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+        
+        .image-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e0e0e0;
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 20px 0;
+            display: none;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: #28a745;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            display: none;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .file-input {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🖼️ Quản lý ảnh sản phẩm</h1>
+        </div>
+        
+        <div class="product-info">
+            <h3>Sản phẩm: <span id="productName">Võng Xếp Ban Mai Inox Kiểu VIP</span></h3>
+            <p><strong>ID:</strong> <span id="productId">1</span></p>
+            <p><strong>Danh mục:</strong> <span id="productCategory">vong-xep</span></p>
+        </div>
+        
+        <div class="upload-section">
+            <h3>📤 Upload ảnh mới</h3>
+            
+            <div class="image-type-selector">
+                <label>Loại ảnh:</label>
+                <label><input type="radio" name="imageType" value="main" checked> Ảnh chính</label>
+                <label><input type="radio" name="imageType" value="gallery"> Ảnh gallery</label>
+            </div>
+            
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📁</div>
+                <div class="upload-text">Kéo thả ảnh vào đây hoặc click để chọn</div>
+                <div class="upload-hint">Hỗ trợ: JPG, PNG, WebP (tối đa 5MB)</div>
+            </div>
+            
+            <input type="file" id="fileInput" class="file-input" accept="image/*" multiple>
+            
+            <div class="progress-bar" id="progressBar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            
+            <div class="alert alert-success" id="successAlert"></div>
+            <div class="alert alert-error" id="errorAlert"></div>
+        </div>
+        
+        <div class="current-images-section">
+            <h3>🖼️ Ảnh hiện tại</h3>
+            <div class="current-images" id="currentImages">
+                <!-- Ảnh sẽ được load bằng JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Cấu hình
+        const API_BASE = 'https://work-1-basmuwpezwxjzzuy.prod-runtime.all-hands.dev';
+        const productId = 1;
+        const productCategory = 'vong-xep';
+        
+        // Elements
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const progressBar = document.getElementById('progressBar');
+        const progressFill = document.getElementById('progressFill');
+        const successAlert = document.getElementById('successAlert');
+        const errorAlert = document.getElementById('errorAlert');
+        const currentImages = document.getElementById('currentImages');
+        
+        // Event listeners
+        uploadArea.addEventListener('click', () => fileInput.click());
+        uploadArea.addEventListener('dragover', handleDragOver);
+        uploadArea.addEventListener('dragleave', handleDragLeave);
+        uploadArea.addEventListener('drop', handleDrop);
+        fileInput.addEventListener('change', handleFileSelect);
+        
+        // Drag & Drop handlers
+        function handleDragOver(e) {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        }
+        
+        function handleDragLeave(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+        }
+        
+        function handleDrop(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            uploadFiles(files);
+        }
+        
+        function handleFileSelect(e) {
+            const files = e.target.files;
+            uploadFiles(files);
+        }
+        
+        // Upload files
+        async function uploadFiles(files) {
+            const imageType = document.querySelector('input[name="imageType"]:checked').value;
+            
+            for (let file of files) {
+                await uploadSingleFile(file, imageType);
+            }
+            
+            // Reload images after upload
+            loadCurrentImages();
+        }
+        
+        async function uploadSingleFile(file, imageType) {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('category', productCategory);
+            formData.append('image_type', imageType);
+            
+            try {
+                showProgress(true);
+                
+                const response = await fetch(`${API_BASE}/api/admin/products/${productId}/images/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showSuccess(`✅ Upload thành công: ${file.name}`);
+                } else {
+                    showError(`❌ Lỗi upload ${file.name}: ${result.detail}`);
+                }
+                
+            } catch (error) {
+                showError(`❌ Lỗi upload ${file.name}: ${error.message}`);
+            } finally {
+                showProgress(false);
+            }
+        }
+        
+        // Load current images
+        async function loadCurrentImages() {
+            try {
+                const response = await fetch(`${API_BASE}/api/admin/products/${productId}/images?category=${productCategory}`);
+                const images = await response.json();
+                
+                displayImages(images);
+                
+            } catch (error) {
+                showError('Lỗi tải ảnh hiện tại: ' + error.message);
+            }
+        }
+        
+        // Display images
+        function displayImages(images) {
+            currentImages.innerHTML = '';
+            
+            // Ảnh chính
+            if (images.main) {
+                currentImages.appendChild(createImageItem(images.main, 'main', 'Ảnh chính'));
+            }
+            
+            // Ảnh gallery
+            images.gallery.forEach((imageUrl, index) => {
+                currentImages.appendChild(createImageItem(imageUrl, 'gallery', `Gallery ${index + 1}`));
+            });
+            
+            if (!images.main && images.gallery.length === 0) {
+                currentImages.innerHTML = '<p style="text-align: center; color: #999; grid-column: 1/-1;">Chưa có ảnh nào</p>';
+            }
+        }
+        
+        // Create image item
+        function createImageItem(imageUrl, type, label) {
+            const div = document.createElement('div');
+            div.className = 'image-item';
+            
+            div.innerHTML = `
+                <img src="${API_BASE}${imageUrl}" alt="${label}" onerror="this.src='/static/images/system/no-image.jpg'">
+                <div class="image-info">
+                    <div class="image-type">${label}</div>
+                    <div class="image-actions">
+                        <button class="btn btn-danger" onclick="deleteImage('${type}')">🗑️ Xóa</button>
+                    </div>
+                </div>
+            `;
+            
+            return div;
+        }
+        
+        // Delete image
+        async function deleteImage(imageType) {
+            if (!confirm('Bạn có chắc muốn xóa ảnh này?')) return;
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/admin/products/${productId}/images/${imageType}?category=${productCategory}`, {
+                    method: 'DELETE'
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showSuccess('✅ Đã xóa ảnh thành công');
+                    loadCurrentImages();
+                } else {
+                    showError('❌ Lỗi xóa ảnh: ' + result.detail);
+                }
+                
+            } catch (error) {
+                showError('❌ Lỗi xóa ảnh: ' + error.message);
+            }
+        }
+        
+        // UI helpers
+        function showProgress(show) {
+            progressBar.style.display = show ? 'block' : 'none';
+            if (show) {
+                progressFill.style.width = '100%';
+            }
+        }
+        
+        function showSuccess(message) {
+            successAlert.textContent = message;
+            successAlert.style.display = 'block';
+            errorAlert.style.display = 'none';
+            setTimeout(() => {
+                successAlert.style.display = 'none';
+            }, 3000);
+        }
+        
+        function showError(message) {
+            errorAlert.textContent = message;
+            errorAlert.style.display = 'block';
+            successAlert.style.display = 'none';
+        }
+        
+        // Load images on page load
+        document.addEventListener('DOMContentLoaded', loadCurrentImages);
+    </script>
+</body>
+</html>

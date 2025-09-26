@@ -1,0 +1,111 @@
+/* Rich Text Editor Styles */
+.rich-text-editor {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+  background: white;
+}
+
+.rich-text-editor .ck-editor {
+  border: none;
+}
+
+.rich-text-editor .ck-editor__top {
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.rich-text-editor .ck-toolbar {
+  border: none;
+  background: #f8f9fa;
+  padding: 10px;
+}
+
+.rich-text-editor .ck-content {
+  border: none;
+  padding: 15px;
+  min-height: 200px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.rich-text-editor .ck-content:focus {
+  box-shadow: none;
+  outline: none;
+}
+
+.rich-text-editor .ck-content p {
+  margin: 0 0 10px 0;
+}
+
+.rich-text-editor .ck-content h1,
+.rich-text-editor .ck-content h2,
+.rich-text-editor .ck-content h3 {
+  margin: 20px 0 10px 0;
+  font-weight: 600;
+}
+
+.rich-text-editor .ck-content ul,
+.rich-text-editor .ck-content ol {
+  margin: 10px 0;
+  padding-left: 20px;
+}
+
+.rich-text-editor .ck-content blockquote {
+  margin: 15px 0;
+  padding: 10px 15px;
+  border-left: 4px solid #007bff;
+  background: #f8f9fa;
+  font-style: italic;
+}
+
+.rich-text-editor .ck-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 15px 0;
+}
+
+.rich-text-editor .ck-content table td,
+.rich-text-editor .ck-content table th {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.rich-text-editor .ck-content table th {
+  background: #f8f9fa;
+  font-weight: 600;
+}
+
+/* Disabled state */
+.rich-text-editor.disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Error state */
+.rich-text-editor.error {
+  border-color: #dc3545;
+}
+
+.rich-text-editor.error .ck-toolbar {
+  background: #f8d7da;
+}
+
+/* Focus state */
+.rich-text-editor:focus-within {
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .rich-text-editor .ck-toolbar {
+    padding: 8px;
+  }
+  
+  .rich-text-editor .ck-content {
+    padding: 12px;
+    font-size: 13px;
+  }
+}

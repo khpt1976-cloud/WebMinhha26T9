@@ -1,0 +1,287 @@
+/* Users Pending Page Styles */
+.pending-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.pending-table {
+  margin-bottom: 0;
+}
+
+.pending-table th {
+  background: #fff3cd;
+  font-weight: 600;
+  color: #856404;
+  border-bottom: 2px solid #ffeaa7;
+  padding: 15px;
+}
+
+.pending-table td {
+  padding: 15px;
+  vertical-align: middle;
+  border-bottom: 1px solid #f1f3f4;
+}
+
+.pending-row {
+  background: #fffbf0;
+  transition: background-color 0.3s;
+}
+
+.pending-row:hover {
+  background: #fff3cd;
+}
+
+/* Pending User Avatar */
+.user-avatar.pending {
+  background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+  border: 2px solid #fff;
+  box-shadow: 0 2px 8px rgba(243, 156, 18, 0.3);
+}
+
+/* Registration Info */
+.registration-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.reg-date {
+  color: #2c3e50;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.time-ago {
+  color: #6c757d;
+  font-size: 12px;
+}
+
+/* IP Address */
+.ip-address {
+  font-family: 'Courier New', monospace;
+  background: #f8f9fa;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 12px;
+  color: #495057;
+}
+
+/* Notes */
+.notes {
+  color: #6c757d;
+  font-style: italic;
+  font-size: 13px;
+}
+
+/* Action Buttons */
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 12px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #6c757d;
+}
+
+.empty-icon {
+  font-size: 64px;
+  margin-bottom: 20px;
+}
+
+.empty-state h3 {
+  color: #2c3e50;
+  margin-bottom: 10px;
+}
+
+.empty-state p {
+  color: #6c757d;
+  font-size: 16px;
+}
+
+/* Approval Modal */
+.approval-modal {
+  max-width: 500px;
+}
+
+.approval-user-info {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.user-avatar-large.pending {
+  background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+  border: 3px solid #fff;
+  box-shadow: 0 4px 12px rgba(243, 156, 18, 0.3);
+}
+
+.user-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 10px;
+}
+
+.user-meta .email {
+  color: #2c3e50;
+  font-size: 14px;
+}
+
+.user-meta .phone {
+  color: #6c757d;
+  font-size: 13px;
+}
+
+.approval-form {
+  margin-top: 20px;
+}
+
+.approval-options {
+  margin-top: 20px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 6px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #495057;
+  cursor: pointer;
+  margin-bottom: 0;
+}
+
+.checkbox-label input[type="checkbox"] {
+  margin: 0;
+}
+
+/* Verification Status Badges */
+.badge.badge-warning {
+  background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+  color: white;
+}
+
+.badge.badge-success {
+  background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+  color: white;
+}
+
+/* Bulk Actions for Pending */
+.bulk-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .pending-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .bulk-actions {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  
+  .pending-table th:nth-child(n+6),
+  .pending-table td:nth-child(n+6) {
+    display: none;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .btn-sm {
+    width: 100%;
+    text-align: center;
+  }
+  
+  .approval-user-info {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .user-meta {
+    align-items: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .pending-table th:nth-child(n+4),
+  .pending-table td:nth-child(n+4) {
+    display: none;
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .empty-state {
+    padding: 40px 15px;
+  }
+  
+  .empty-icon {
+    font-size: 48px;
+  }
+}
+
+/* Animation for pending rows */
+@keyframes pendingPulse {
+  0% { background-color: #fffbf0; }
+  50% { background-color: #fff8e1; }
+  100% { background-color: #fffbf0; }
+}
+
+.pending-row.new {
+  animation: pendingPulse 2s ease-in-out 3;
+}
+
+/* Priority indicators */
+.pending-row.urgent {
+  border-left: 4px solid #e74c3c;
+}
+
+.pending-row.urgent .time-ago {
+  color: #e74c3c;
+  font-weight: 600;
+}
+
+/* Verification status icons */
+.verification-status {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.verification-icon {
+  font-size: 16px;
+}
+
+.verification-text {
+  font-size: 12px;
+  font-weight: 500;
+}
