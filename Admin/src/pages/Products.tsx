@@ -1,11 +1,21 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import ProductModal from '../components/ProductModal';
 import BulkActions from '../components/BulkActions';
 import productService, { Product, Category } from '../services/productService';
 import { useAuth } from '../contexts/AuthContext';
 import './Products.css';
 
-const Products: React.FC = () => {
+interface ProductsProps {
+  filter?: string;
+}
+
+const Products: React.FC<ProductsProps> = ({ filter: propFilter }) => {
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const urlFilter = queryParams.get('filter');
+  const filter = propFilter || urlFilter;
+  
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -21,11 +31,10 @@ const Products: React.FC = () => {
 
   const { hasPermission } = useAuth();
   const itemsPerPage = 10;
-
   useEffect(() => {
     loadProducts();
     loadCategories();
-  }, [currentPage, searchTerm, selectedCategory, selectedStatus]);
+  }, [currentPage, searchTerm, selectedCategory, selectedStatus, filter]);
 
   const loadProducts = async () => {
     try {
@@ -41,8 +50,17 @@ const Products: React.FC = () => {
       };
 
       const response = await productService.getProducts(params);
-      setProducts(response.data);
-      setTotalProducts(response.pagination?.total || 0);
+      let filteredProducts = response.data;
+      
+      // Filter for HOT products if filter prop is 'hot'
+      if (filter === 'hot') {
+        filteredProducts = response.data.filter(product => product.is_hot === true);
+        setTotalProducts(filteredProducts.length);
+      } else {
+        setTotalProducts(response.pagination?.total || 0);
+      }
+      
+      setProducts(filteredProducts);
     } catch (error: any) {
       setError(error.message || 'Không thể tải danh sách sản phẩm');
       console.error('Load products error:', error);
@@ -207,8 +225,8 @@ const Products: React.FC = () => {
       {/* Header */}
       <div className="page-header">
         <div className="header-left">
-          <h1>Quản Lý Sản Phẩm</h1>
-          <p>Quản lý toàn bộ sản phẩm của cửa hàng</p>
+          <h1>{filter === 'hot' ? 'Sản Phẩm HOT 🔥' : 'Quản Lý Sản Phẩm'}</h1>
+          <p>{filter === 'hot' ? 'Danh sách các sản phẩm HOT đang bán chạy' : 'Quản lý toàn bộ sản phẩm của cửa hàng'}</p>
         </div>
         <div className="header-right">
           <button className="btn btn-primary" onClick={handleAddProduct}>

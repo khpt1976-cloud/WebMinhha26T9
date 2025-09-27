@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import starIcon from '../assets/icons/star_5.png';
-import { getProductById, ProductDetail as ProductDetailType, getImageUrl } from '../services/api';
+import { getProductById, ProductDetail as ProductDetailType } from '../services/api';
+import { getImageUrl } from '../utils/imageUtils';
 
 const Container = styled.div`
   max-width: 1200px;
@@ -370,14 +371,11 @@ const ProductDetail: React.FC = () => {
           </Description>
 
           {product.features && product.features.length > 0 && (
-            <div>
-              <h3>Tính năng nổi bật</h3>
-              <FeaturesList>
-                {product.features.map((feature, index) => (
-                  <li key={index}>{feature}</li>
-                ))}
-              </FeaturesList>
-            </div>
+            <FeaturesList>
+              {product.features.map((feature: string, index: number) => (
+                <li key={index}>{feature}</li>
+              ))}
+            </FeaturesList>
           )}
         </InfoSection>
       </ProductContainer>

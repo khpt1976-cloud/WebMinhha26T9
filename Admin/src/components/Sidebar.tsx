@@ -48,19 +48,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
       children: [
         { id: 'products-list', title: 'Danh sách SP', icon: '📦', path: '/products' },
         { id: 'categories', title: 'Danh mục', icon: '📂', path: '/categories' },
-        { id: 'inventory', title: 'Quản lý Kho', icon: '📊', path: '/inventory' },
-        { id: 'products-hot', title: 'Sản phẩm HOT', icon: '🔥', path: '/products/hot' }
-      ]
-    },
-    {
-      id: 'orders',
-      title: 'Đơn hàng',
-      icon: '🛒',
-      path: '/orders',
-      children: [
-        { id: 'orders-list', title: 'Tất cả đơn hàng', icon: '📋', path: '/orders' },
-        { id: 'orders-pending', title: 'Chờ xử lý', icon: '⏳', path: '/orders/pending' },
-        { id: 'orders-completed', title: 'Hoàn thành', icon: '✅', path: '/orders/completed' }
+        { id: 'products-hot', title: 'Sản phẩm HOT', icon: '🔥', path: '/products?filter=hot' }
       ]
     },
     {
@@ -69,23 +57,24 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
       icon: '⚙️',
       path: '/settings',
       children: [
-        { id: 'settings-general', title: 'Cài đặt chung', icon: '🔧', path: '/settings/general' },
+        { id: 'settings-general', title: 'Cài đặt hệ thống', icon: '🔧', path: '/settings' },
         { id: 'settings-header', title: 'Header/Footer', icon: '🎨', path: '/settings/header' },
-        { id: 'settings-social', title: 'Mạng xã hội', icon: '📱', path: '/settings/social' },
-        { id: 'settings-contact', title: 'Thông tin LH', icon: '📞', path: '/settings/contact' }
+        { id: 'settings-contact', title: 'Thông tin LH', icon: '📞', path: '/settings/contact' },
+        { id: 'settings-social', title: 'Mạng xã hội', icon: '📱', path: '/settings/social' }
       ]
     },
-    {
-      id: 'analytics',
-      title: 'Thống kê',
-      icon: '📈',
-      path: '/analytics',
-      children: [
-        { id: 'analytics-overview', title: 'Tổng quan', icon: '📊', path: '/analytics' },
-        { id: 'analytics-sales', title: 'Doanh thu', icon: '💰', path: '/analytics/sales' },
-        { id: 'analytics-products', title: 'Sản phẩm', icon: '📦', path: '/analytics/products' }
-      ]
-    },
+    // Ẩn phần thống kê - không cần cho website bán võng xếp
+    // {
+    //   id: 'analytics',
+    //   title: 'Thống kê',
+    //   icon: '📈',
+    //   path: '/analytics',
+    //   children: [
+    //     { id: 'analytics-overview', title: 'Tổng quan', icon: '📊', path: '/analytics' },
+    //     { id: 'analytics-sales', title: 'Doanh thu', icon: '💰', path: '/analytics/sales' },
+    //     { id: 'analytics-products', title: 'Sản phẩm', icon: '📦', path: '/analytics/products' }
+    //   ]
+    // },
     {
       id: 'system',
       title: 'Hệ thống',

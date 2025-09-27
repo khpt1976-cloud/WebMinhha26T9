@@ -1,8 +1,7 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import starIcon from '../assets/icons/star_5.png';
-import { getImageUrl } from '../services/api';
+import { getImageUrl } from '../utils/imageUtils';
 
 interface ProductCardProps {
   id: number;
@@ -11,12 +10,12 @@ interface ProductCardProps {
   price?: string;
   originalPrice?: string;
   rating?: number;
+  isHot?: boolean;
 }
 
 const Card = styled.div`
   background: white;
   border: 1px solid #e0e0e0;
-  border-radius: 8px;
   overflow: hidden;
   transition: all 0.3s ease;
   cursor: pointer;
@@ -107,7 +106,8 @@ const ProductCard: React.FC<ProductCardProps> = ({
   title,
   price,
   originalPrice,
-  rating = 5
+  rating = 5,
+  isHot = false
 }) => {
   const navigate = useNavigate();
 
@@ -117,7 +117,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
   return (
     <Card onClick={handleClick}>
-      <HotLabel>HOT</HotLabel>
+      {isHot && <HotLabel>HOT</HotLabel>}
       <ImageContainer>
         <ProductImage src={getImageUrl(image)} alt={title} />
       </ImageContainer>

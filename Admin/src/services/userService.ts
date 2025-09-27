@@ -80,7 +80,7 @@ class UserService {
       if (filters.page) params.append('page', filters.page.toString());
       if (filters.limit) params.append('limit', filters.limit.toString());
 
-      const response = await api.get(`/api/v1/users?${params.toString()}`);
+      const response = await api.get(`/api/users/?${params.toString()}`);
       return response.data;
     } catch (error) {
       console.error('Error fetching users:', error);
@@ -90,7 +90,7 @@ class UserService {
 
   async getUserById(id: number): Promise<ApiResponse<User>> {
     try {
-      const response = await api.get(`/api/v1/users/${id}`);
+      const response = await api.get(`/api/users/${id}`);
       return response.data;
     } catch (error) {
       console.error('Error fetching user:', error);
@@ -202,7 +202,7 @@ class UserService {
   // Role Management
   async getRoles(): Promise<ApiResponse<Role[]>> {
     try {
-      const response = await api.get('/api/v1/users/roles');
+      const response = await api.get('/api/users/roles/');
       return response.data;
     } catch (error) {
       console.error('Error fetching roles:', error);

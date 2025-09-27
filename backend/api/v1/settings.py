@@ -649,3 +649,51 @@ async def reset_setting_to_default(
         success=True,
         message=f"Setting {setting.key} has been reset to default value"
     )
+
+@router.post("/save-as-default", response_model=ApiResponse)
+async def save_current_settings_as_default(
+    request: Request,
+    settings_data: Dict[str, str],
+    current_user: User = Depends(require_permission("settings.update")),
+    db: Session = Depends(get_db)
+):
+    """
+    Save current website settings as default values
+    """
+    updated_settings = []
+    old_defaults = {}
+    new_defaults = {}
+    
+    for key, value in settings_data.items():
+        setting = db.query(WebsiteSetting).filter(WebsiteSetting.key == key).first()
+        if setting:
+            old_defaults[key] = setting.default_value
+            setting.default_value = value
+            setting.updated_at = datetime.now(timezone.utc)
+            setting.updated_by = current_user.id
+            updated_settings.append(key)
+            new_defaults[key] = value
+    
+    if not updated_settings:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No valid settings found to save as default"
+        )
+    
+    db.commit()
+    
+    # Log activity
+    client_ip = request.client.host if request.client else "unknown"
+    log_user_activity(
+        db, current_user, "update", "settings", "save_as_default",
+        description=f"Saved {len(updated_settings)} settings as default values",
+        user_ip=client_ip,
+        old_values=old_defaults,
+        new_values=new_defaults
+    )
+    
+    return ApiResponse(
+        success=True,
+        message=f"Successfully saved {len(updated_settings)} settings as default values",
+        data={"updated_settings": updated_settings}
+    )

@@ -1,8 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import styled from 'styled-components';
+import { useNavigate } from 'react-router-dom';
+import styled, { createGlobalStyle } from 'styled-components';
 import ProductCard from './ProductCard';
 import { apiService, Category } from '../services/api';
 import proxyApi from '../services/proxy-api';
+
+const GlobalStyle = createGlobalStyle`
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+`;
 
 const GridContainer = styled.div`
   max-width: 1200px;
@@ -124,6 +133,7 @@ const LoadingSpinner = styled.div`
 `;
 
 const ProductGrid: React.FC = () => {
+  const navigate = useNavigate();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentSlides, setCurrentSlides] = useState<{[key: number]: number}>({});
@@ -156,6 +166,7 @@ const ProductGrid: React.FC = () => {
         try {
           const products = await proxyApi.getProducts();
           console.log('✅ Proxy API products:', products.length);
+          console.log('🔍 First product structure:', products[0]);
           
           if (products && products.length > 0) {
             // Group products by category
@@ -171,7 +182,19 @@ const ProductGrid: React.FC = () => {
                   products: []
                 });
               }
-              categoryMap.get(categoryName).products.push(product);
+              
+              // Add is_hot property based on product ID or name
+              const enhancedProduct = {
+                ...product,
+                is_hot: product.is_hot || 
+                       product.id === 1 || 
+                       product.id === 5 || 
+                       product.title?.includes('VIP') ||
+                       product.title?.includes('Cao Cấp') ||
+                       Math.random() > 0.7 // Random 30% chance for demo
+              };
+              
+              categoryMap.get(categoryName).products.push(enhancedProduct);
             });
             
             const categoriesWithProducts = Array.from(categoryMap.values()).map(category => ({
@@ -243,7 +266,8 @@ const ProductGrid: React.FC = () => {
                 price: "1.150.000đ",
                 original_price: "1.210.000đ",
                 rating: 5,
-                category: "vong-xep"
+                category: "vong-xep",
+                is_hot: true
               },
               {
                 id: 2,
@@ -286,7 +310,8 @@ const ProductGrid: React.FC = () => {
                 price: "450.000đ",
                 original_price: "600.000đ",
                 rating: 5,
-                category: "rem-man"
+                category: "rem-man",
+                is_hot: true
               },
               {
                 id: 6,
@@ -406,11 +431,14 @@ const ProductGrid: React.FC = () => {
                   price={product.price}
                   originalPrice={product.original_price?.toString() || ''}
                   rating={product.rating}
+                  isHot={product.is_hot || false}
                 />
               ))}
             </Grid>
           </CarouselContainer>
-          <ViewAllButton>Xem tất cả</ViewAllButton>
+          <ViewAllButton onClick={() => navigate(`/danh-muc/${category.slug}`)}>
+            Xem tất cả
+          </ViewAllButton>
         </CategorySection>
       ))}
     </GridContainer>

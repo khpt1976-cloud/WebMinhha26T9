@@ -1,7 +1,7 @@
 // Product Service - API integration for Product Management
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:12000';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
 // Create axios instance with default config
 const api = axios.create({
@@ -353,7 +353,26 @@ class ProductService {
    */
   async createCategory(category: Omit<Category, 'id' | 'createdAt' | 'updatedAt' | 'productCount'>): Promise<ApiResponse<Category>> {
     try {
-      const response = await api.post('/categories', category);
+      // Only send fields that backend expects
+      const createData = {
+        name: category.name,
+        slug: category.slug,
+        description: category.description,
+        parent_id: category.parent_id,
+        sort_order: category.sort_order,
+        meta_title: category.meta_title,
+        meta_description: category.meta_description,
+        meta_keywords: category.meta_keywords,
+        image_url: category.image_url,
+        is_active: category.is_active
+      };
+      
+      // Remove undefined values
+      const cleanData = Object.fromEntries(
+        Object.entries(createData).filter(([_, value]) => value !== undefined)
+      );
+      
+      const response = await api.post('/api/v1/products/categories', cleanData);
       return response.data;
     } catch (error) {
       console.error('Error creating category:', error);
@@ -366,7 +385,26 @@ class ProductService {
    */
   async updateCategory(id: number, category: Partial<Category>): Promise<ApiResponse<Category>> {
     try {
-      const response = await api.put(`/categories/${id}`, category);
+      // Only send fields that backend expects
+      const updateData = {
+        name: category.name,
+        slug: category.slug,
+        description: category.description,
+        parent_id: category.parent_id,
+        sort_order: category.sort_order,
+        meta_title: category.meta_title,
+        meta_description: category.meta_description,
+        meta_keywords: category.meta_keywords,
+        image_url: category.image_url,
+        is_active: category.is_active
+      };
+      
+      // Remove undefined values
+      const cleanData = Object.fromEntries(
+        Object.entries(updateData).filter(([_, value]) => value !== undefined)
+      );
+      
+      const response = await api.put(`/api/v1/products/categories/${id}`, cleanData);
       return response.data;
     } catch (error) {
       console.error('Error updating category:', error);
@@ -379,10 +417,12 @@ class ProductService {
    */
   async deleteCategory(id: number): Promise<ApiResponse<null>> {
     try {
-      const response = await api.delete(`/categories/${id}`);
+      console.log('🔗 DELETE URL:', `/api/v1/products/categories/${id}`);
+      const response = await api.delete(`/api/v1/products/categories/${id}`);
+      console.log('🔗 DELETE Response:', response);
       return response.data;
     } catch (error) {
-      console.error('Error deleting category:', error);
+      console.error('🔗 DELETE Error:', error);
       throw this.handleError(error);
     }
   }

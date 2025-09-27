@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import dashboardService, { DashboardOverview, RecentActivity } from '../services/dashboardService';
 
 const Dashboard: React.FC = () => {
-  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
   const [overview, setOverview] = useState<DashboardOverview | null>(null);
   const [recentActivities, setRecentActivities] = useState<RecentActivity[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-
   useEffect(() => {
     loadDashboardData();
   }, []);
@@ -56,6 +57,23 @@ const Dashboard: React.FC = () => {
       day: '2-digit',
       month: '2-digit'
     });
+  };
+
+  // Navigation handlers for dashboard buttons
+  const handleAddProduct = () => {
+    navigate('/products');
+  };
+
+  const handleManageUsers = () => {
+    navigate('/users');
+  };
+
+  const handleViewStats = () => {
+    alert('Chức năng thống kê không cần thiết cho website này');
+  };
+
+  const handleSystemSettings = () => {
+    navigate('/settings');
   };
 
   if (loading) {
@@ -152,16 +170,13 @@ const Dashboard: React.FC = () => {
           <p>Đây là trang quản trị cho website <strong>Cửa Hàng Minh Hà</strong>. Bạn có thể quản lý sản phẩm, người dùng và cài đặt website từ đây.</p>
           
           <div style={{ marginTop: '20px', display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
-            <button className="btn btn-primary">
+            <button className="btn btn-primary" onClick={handleAddProduct}>
               ➕ Thêm sản phẩm mới
             </button>
-            <button className="btn btn-success">
+            <button className="btn btn-success" onClick={handleManageUsers}>
               👥 Quản lý người dùng
             </button>
-            <button className="btn btn-warning">
-              📊 Xem thống kê
-            </button>
-            <button className="btn btn-outline">
+            <button className="btn btn-outline" onClick={handleSystemSettings}>
               ⚙️ Cài đặt hệ thống
             </button>
           </div>

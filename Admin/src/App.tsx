@@ -12,6 +12,7 @@ import Roles from './pages/Roles';
 import Products from './pages/Products';
 import Categories from './pages/Categories';
 import Inventory from './pages/Inventory';
+import Settings from './pages/Settings';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -55,6 +56,11 @@ function App() {
               <Route path="/inventory" element={
                 <ProtectedRoute permission="manage_products">
                   <Layout><Inventory /></Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/settings/*" element={
+                <ProtectedRoute>
+                  <Layout><Settings /></Layout>
                 </ProtectedRoute>
               } />
               <Route path="/" element={<Navigate to="/dashboard" replace />} />

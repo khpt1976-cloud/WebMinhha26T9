@@ -69,7 +69,13 @@ class SettingsService {
 
   async updateWebsiteSettings(settings: SettingsUpdateRequest): Promise<void> {
     try {
-      await api.put('/api/v1/settings/website', settings);
+      // Convert settings array to object format expected by API
+      const settingsObject: { [key: string]: string } = {};
+      settings.settings.forEach(setting => {
+        settingsObject[setting.key] = setting.value;
+      });
+      
+      await api.put('/api/v1/settings/website/bulk', settingsObject);
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Failed to update website settings');
     }
@@ -249,6 +255,20 @@ class SettingsService {
       await api.post(`/api/v1/settings/reset${params}`);
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Failed to reset settings');
+    }
+  }
+
+  async saveCurrentSettingsAsDefault(settings: SettingsUpdateRequest): Promise<void> {
+    try {
+      // Convert settings array to object format expected by API
+      const settingsObject: { [key: string]: string } = {};
+      settings.settings.forEach(setting => {
+        settingsObject[setting.key] = setting.value;
+      });
+      
+      await api.post('/api/v1/settings/save-as-default', settingsObject);
+    } catch (error: any) {
+      throw new Error(error.response?.data?.message || 'Failed to save settings as default');
     }
   }
 }

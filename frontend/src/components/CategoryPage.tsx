@@ -213,10 +213,34 @@ const CategoryPage: React.FC = () => {
       try {
         setLoading(true);
         const allProducts = await getProducts();
-        const filteredProducts = allProducts.filter((product: Product) => 
-          product.category === category
-        );
-        setProducts(filteredProducts);
+        
+        console.log('Category from URL:', category);
+        console.log('All products:', allProducts.length);
+        
+        // Show all products if no category or if filtering fails
+        if (!category) {
+          setProducts(allProducts);
+          return;
+        }
+        
+        const filteredProducts = allProducts.filter((product: Product) => {
+          // Try multiple matching strategies
+          const categoryMatch = 
+            product.category === category ||
+            product.category?.toLowerCase() === category?.toLowerCase() ||
+            product.category_name === category ||
+            product.category_name?.toLowerCase() === category?.toLowerCase() ||
+            // Also try slug matching
+            category.includes(product.category?.toLowerCase() || '') ||
+            (product.category?.toLowerCase() || '').includes(category.toLowerCase());
+          
+          return categoryMatch;
+        });
+        
+        console.log('Filtered products:', filteredProducts.length);
+        
+        // If no products found with filtering, show all products
+        setProducts(filteredProducts.length > 0 ? filteredProducts : allProducts);
       } catch (error) {
         console.error('Error fetching products:', error);
       } finally {
@@ -224,15 +248,12 @@ const CategoryPage: React.FC = () => {
       }
     };
 
-    if (category) {
-      fetchProducts();
-    }
+    fetchProducts();
   }, [category]);
 
   const handleBackClick = () => {
     navigate('/');
   };
-
   if (loading) {
     return (
       <LoadingContainer>
@@ -284,6 +305,7 @@ const CategoryPage: React.FC = () => {
                   price={product.price}
                   originalPrice={product.original_price?.toString() || ''}
                   rating={product.rating}
+                  isHot={product.is_hot || false}
                 />
               ))}
             </ProductGrid>

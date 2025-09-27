@@ -58,28 +58,40 @@ const Categories: React.FC = () => {
   };
 
   const handleDeleteCategory = async (categoryId: number) => {
+    console.log('🗑️ DELETE CLICKED - Category ID:', categoryId);
+    
     const category = categories.find(c => c.id === categoryId);
-    if (!category) return;
-
+    if (!category) {
+      alert('❌ Không tìm thấy danh mục!');
+      return;
+    }
+    
+    console.log('📋 Found category:', category.name);
+    
     if (category.product_count && category.product_count > 0) {
-      alert(`Không thể xóa danh mục "${category.name}" vì còn ${category.product_count} sản phẩm`);
+      alert(`❌ Không thể xóa danh mục "${category.name}" vì còn ${category.product_count} sản phẩm`);
       return;
     }
 
-    if (window.confirm(`Bạn có chắc chắn muốn xóa danh mục "${category.name}"?`)) {
+    if (window.confirm(`🗑️ Bạn có chắc chắn muốn xóa danh mục "${category.name}"?`)) {
       try {
-        // await productService.deleteCategory(categoryId);
+        console.log('🔄 Calling API delete...');
+        const response = await productService.deleteCategory(categoryId);
+        console.log('✅ API Response:', response);
+        
+        // Remove from local state
         setCategories(categories.filter(c => c.id !== categoryId));
-        console.log('Deleted category:', categoryId);
+        alert('✅ Đã xóa danh mục thành công!');
       } catch (error: any) {
-        alert(error.message || 'Không thể xóa danh mục');
+        console.error('❌ Delete error:', error);
+        alert(`❌ Lỗi: ${error.message || 'Không thể xóa danh mục'}`);
       }
     }
   };
 
   const handleStatusChange = async (categoryId: number, newStatus: boolean) => {
     try {
-      // await productService.updateCategory(categoryId, { is_active: newStatus });
+      await productService.updateCategory(categoryId, { is_active: newStatus });
       setCategories(categories.map(c =>
         c.id === categoryId ? { ...c, is_active: newStatus } : c
       ));
@@ -93,27 +105,18 @@ const Categories: React.FC = () => {
     try {
       if (editingCategory) {
         // Update existing category
-        // const updatedCategory = await productService.updateCategory(editingCategory.id!, categoryData);
-        const updatedCategory = { 
-          ...categoryData, 
-          id: editingCategory.id,
-          created_at: editingCategory.created_at,
-          updated_at: new Date().toISOString()
-        };
-        setCategories(categories.map(c => c.id === editingCategory.id ? updatedCategory : c));
+        const response = await productService.updateCategory(editingCategory.id!, categoryData);
+        const updatedCategory = response.data || response;
+        setCategories(categories.map(c => c.id === editingCategory.id ? updatedCategory as Category : c));
         console.log('Updated category:', updatedCategory);
+        alert('✅ Đã cập nhật danh mục thành công!');
       } else {
         // Create new category
-        // const newCategory = await productService.createCategory(categoryData);
-        const newCategory = { 
-          ...categoryData, 
-          id: Math.max(...categories.map(c => c.id || 0), 0) + 1,
-          product_count: 0,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        };
-        setCategories([...categories, newCategory]);
+        const response = await productService.createCategory(categoryData);
+        const newCategory = response.data || response;
+        setCategories([...categories, newCategory as Category]);
         console.log('Created category:', newCategory);
+        alert('✅ Đã tạo danh mục mới thành công!');
       }
       await loadCategories(); // Reload to get fresh data
     } catch (error: any) {
